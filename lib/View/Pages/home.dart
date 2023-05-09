@@ -1,27 +1,76 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:project_1/Model/weatherModel.dart';
+import 'package:http/http.dart' as http;
 import 'package:project_1/Utils/staticfile.dart';
 import 'package:project_1/View/Pages/bottomnavBar.dart';
 import 'package:project_1/Model/weatherModel.dart';
 import 'package:project_1/services/weather_api_client.dart';
 
 class Home extends StatefulWidget {
-  List<WeatherModel> weatherModel = [];
-  Home({required this.weatherModel});
-
   @override
-  State<Home> createState() => _HomeState();
+  _HomeState createState() => _HomeState();
 }
 
 class _HomeState extends State<Home> {
-  weatherApiClient client = weatherApiClient();
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Center(
+        child: FutureBuilder(
+          builder: (context, snapshot) {
+            if (snapshot != null) {
+              WeatherModel? _weather = snapshot.data;
+              if (_weather == null) {
+                return Text('Error Getting Weather');
+              } else {
+                return weatherBox(_weather);
+              }
+            } else {
+              return CircularProgressIndicator();
+            }
+          },
+          future: getCurrentWeather(),
+        ),
+      ),
+    );
+  }
+
+  Widget weatherBox(WeatherModel _weathermodel) {
+    return Column(children: <Widget>[
+      Text("${_weathermodel.temp}℃"),
+      Text("${_weathermodel.description}"),
+      Text("Feels:${_weathermodel.feelsLike}"),
+      Text("H:${_weathermodel.high}℃ L:${_weathermodel.low}℃"),
+    ]);
+  }
+
+  Future<WeatherModel> getCurrentWeather() async {
+    WeatherModel weathermodel;
+    String location = 'calgary';
+    String apiKey = 'eedffe980ac9dfa9c47dc3c855b96081';
+    var url =
+        'https://api.openweathermap.org/data/2.5/weather?q=$location&appid=$apiKey&units=metric';
+
+    final response = await http.get(Uri.parse(url));
+
+    if (response.statusCode == 200) {
+      weathermodel = WeatherModel.fromJson(jsonDecode(response.body));
+    } else {
+      throw Exception('Failed to load weather data');
+    }
+    return weathermodel;
+  }
+}
+  /*  weatherApiClient client = weatherApiClient();
   @override
   void initState() {
     super.initState();
     client.getCurrentWeather('Georgia');
-  }
+  } */
 
-  find_myLocation_index() {
+  /*find_myLocation_index() {
     for (var i = 0; i < widget.weatherModel.length; i++) {
       if (widget.weatherModel[i].name == StaticFile.myLocation) {
         setState(() {
@@ -30,9 +79,9 @@ class _HomeState extends State<Home> {
         break;
       }
     }
-  }
+  } */
 
-  @override
+  /*  @override
   Widget build(BuildContext context) {
     double myHeight = MediaQuery.of(context).size.height;
     double myWidth = MediaQuery.of(context).size.width;
@@ -177,5 +226,5 @@ class _HomeState extends State<Home> {
             )),
       ),
     );
-  }
-}
+  } 
+}*/
