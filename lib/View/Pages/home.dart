@@ -39,10 +39,30 @@ class _HomeState extends State<Home> {
 
   Widget weatherBox(WeatherModel _weathermodel) {
     return Column(children: <Widget>[
-      Text("${_weathermodel.temp}℃"),
-      Text("${_weathermodel.description}"),
-      Text("Feels:${_weathermodel.feelsLike}"),
-      Text("H:${_weathermodel.high}℃ L:${_weathermodel.low}℃"),
+      Container(
+        child: Text(
+          "${_weathermodel.temp}℃",
+          style: TextStyle(fontSize: 40, color: Colors.black),
+        ),
+      ),
+      Container(
+        child: Text(
+          "${_weathermodel.description}",
+          style: TextStyle(color: Colors.black, fontSize: 20),
+        ),
+      ),
+      Container(
+        child: Text(
+          "Feels:${_weathermodel.feelsLike}",
+          style: TextStyle(color: Colors.black38, fontSize: 20),
+        ),
+      ),
+      Container(
+        child: Text(
+          "H:${_weathermodel.high}℃ L:${_weathermodel.low}℃",
+          style: TextStyle(color: Colors.black, fontSize: 20),
+        ),
+      ),
     ]);
   }
 
