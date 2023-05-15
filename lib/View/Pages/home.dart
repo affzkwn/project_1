@@ -38,11 +38,14 @@ class _HomeState extends State<Home> {
   }
 
   Widget weatherBox(WeatherModel _weathermodel) {
-    return Column(children: <Widget>[
+    return Column(mainAxisSize: MainAxisSize.min, children: <Widget>[
       Container(
+        margin: const EdgeInsets.all(10.0),
         child: Text(
           "${_weathermodel.temp}℃",
-          style: TextStyle(fontSize: 40, color: Colors.black),
+          textAlign: TextAlign.center,
+          style: TextStyle(
+              fontSize: 55, color: Colors.black, fontWeight: FontWeight.bold),
         ),
       ),
       Container(
@@ -68,7 +71,7 @@ class _HomeState extends State<Home> {
 
   Future<WeatherModel> getCurrentWeather() async {
     WeatherModel weathermodel;
-    String location = 'calgary';
+    String location = 'Kuala Lumpur';
     String apiKey = 'eedffe980ac9dfa9c47dc3c855b96081';
     var url =
         'https://api.openweathermap.org/data/2.5/weather?q=$location&appid=$apiKey&units=metric';
