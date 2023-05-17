@@ -1,4 +1,5 @@
-class WeatherModel {
+class Daily {
+  final double dt;
   final double temp;
   final double feelsLike;
   final double low;
@@ -9,7 +10,8 @@ class WeatherModel {
   final double wind;
   final String icon;
 
-  WeatherModel({
+  Daily({
+    required this.dt,
     required this.temp,
     required this.feelsLike,
     required this.low,
@@ -21,8 +23,9 @@ class WeatherModel {
     required this.icon,
   });
 
-  factory WeatherModel.fromJson(Map<String, dynamic> json) {
-    return WeatherModel(
+  factory Daily.fromJson(Map<String, dynamic> json) {
+    return Daily(
+      dt: json['dt'].toDouble(),
       temp: json['main']['temp'].toDouble(),
       feelsLike: json['main']['feels_like'].toDouble(),
       low: json['main']['temp_min'].toDouble(),
