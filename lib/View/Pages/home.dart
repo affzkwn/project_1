@@ -3,17 +3,25 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:project_1/Model/weatherModel.dart';
 import 'package:http/http.dart' as http;
-import 'package:project_1/Utils/staticfile.dart';
-import 'package:project_1/View/Pages/bottomnavBar.dart';
-import 'package:project_1/Model/weatherModel.dart';
-import 'package:project_1/services/weather_api_client.dart';
+import 'package:project_1/Model/location.dart';
 
 class Home extends StatefulWidget {
+  final List<Location> locations;
+  const Home(this.locations);
+
   @override
-  _HomeState createState() => _HomeState();
+  _HomeState createState() => _HomeState(this.locations);
 }
 
 class _HomeState extends State<Home> {
+  final List<Location> locations;
+  final Location location;
+  late WeatherModel _weathermodel;
+
+  _HomeState(List<Location> locations)
+      : this.locations = locations,
+        this.location = locations[0];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
