@@ -1,6 +1,9 @@
 import 'dart:convert';
+import 'dart:html';
 
 import 'package:flutter/material.dart';
+import 'package:project_1/Model/extension.dart';
+import 'package:project_1/Model/forecast.dart';
 import 'package:project_1/Model/weatherModel.dart';
 import 'package:http/http.dart' as http;
 import 'package:project_1/Model/location.dart';
@@ -25,237 +28,166 @@ class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: FutureBuilder(
-          builder: (context, snapshot) {
-            if (snapshot != null) {
-              WeatherModel? _weather = snapshot.data;
-              if (_weather == null) {
-                return Text('Error Getting Weather');
-              } else {
-                return weatherBox(_weather);
-              }
-            } else {
-              return CircularProgressIndicator();
-            }
-          },
-          future: getCurrentWeather(),
-        ),
-      ),
-    );
-  }
-
-  Widget weatherBox(WeatherModel _weathermodel) {
-    return Column(mainAxisSize: MainAxisSize.min, children: <Widget>[
-      Container(
-        margin: const EdgeInsets.all(10.0),
-        child: Text(
-          "${_weathermodel.temp}℃",
-          textAlign: TextAlign.center,
-          style: TextStyle(
-              fontSize: 55, color: Colors.black, fontWeight: FontWeight.bold),
-        ),
-      ),
-      Container(
-        child: Text(
-          "${_weathermodel.description}",
-          style: TextStyle(color: Colors.black, fontSize: 20),
-        ),
-      ),
-      Container(
-        child: Text(
-          "Feels:${_weathermodel.feelsLike}",
-          style: TextStyle(color: Colors.black38, fontSize: 20),
-        ),
-      ),
-      Container(
-        child: Text(
-          "H:${_weathermodel.high}℃ L:${_weathermodel.low}℃",
-          style: TextStyle(color: Colors.black, fontSize: 20),
-        ),
-      ),
-    ]);
-  }
-
-  Future<WeatherModel> getCurrentWeather() async {
-    WeatherModel weathermodel;
-    String location = 'Kuala Lumpur';
-    String apiKey = 'eedffe980ac9dfa9c47dc3c855b96081';
-    var url =
-        'https://api.openweathermap.org/data/2.5/weather?q=$location&appid=$apiKey&units=metric';
-
-    final response = await http.get(Uri.parse(url));
-
-    if (response.statusCode == 200) {
-      weathermodel = WeatherModel.fromJson(jsonDecode(response.body));
-    } else {
-      throw Exception('Failed to load weather data');
-    }
-    return weathermodel;
+        backgroundColor: Colors.grey[100],
+        body: ListView(children: <Widget>[
+          currentWeatherViews(this.locations, this.location, this.context),
+          forecastViewsHourly(this.location),
+          forecastViewsDaily(this.location),
+        ]));
   }
 }
-  /*  weatherApiClient client = weatherApiClient();
-  @override
-  void initState() {
-    super.initState();
-    client.getCurrentWeather('Georgia');
-  } */
 
-  /*find_myLocation_index() {
-    for (var i = 0; i < widget.weatherModel.length; i++) {
-      if (widget.weatherModel[i].name == StaticFile.myLocation) {
-        setState(() {
-          StaticFile.myLocationIndex = i;
-        });
-        break;
+Widget currentWeatherViews(
+    List<Location> locations, Location location, BuildContext context) {
+  WeatherModel _weathermodel;
+
+  return FutureBuilder(
+    builder: (context, snapshot) {
+      if (snapshot.hasData) {
+        _weathermodel = snapshot.data;
+        if (_weathermodel == null) {
+          return Text("Error Getting Weather");
+        } else {
+          return Column(children: [
+            createAppBar(locations, location, context),
+            weatherBox(_weathermodel),
+            weatherDetailsBox(_weathermodel),
+          ]);
+        }
+      } else {
+        return Center(child: CircularProgressIndicator());
       }
-    }
-  } */
+    },
+    future: getCurrentWeather(location),
+  );
+}
 
-  /*  @override
-  Widget build(BuildContext context) {
-    double myHeight = MediaQuery.of(context).size.height;
-    double myWidth = MediaQuery.of(context).size.width;
-    return SafeArea(
-      child: Scaffold(
-        backgroundColor: Color(0xff060720),
-        body: Container(
-            height: myHeight,
-            width: myWidth,
+Widget forecastViewsHourly(Location location) {
+  Forecast _forecast;
+
+  return FutureBuilder(
+    builder: (context, snapshot) {
+      if (snapshot.hasData) {
+        _forecast = snapshot.data;
+        if (_forecast == null) {
+          return Text("Error Getting Weather");
+        } else {
+          return hourlyBoxes(_forecast);
+        }
+      } else {
+        return Center(child: CircularProgressIndicator());
+      }
+    },
+    future: getForecast(location),
+  );
+}
+
+Widget forecastViewsDaily(Location location) {
+  Forecast _forecast;
+
+  return FutureBuilder(
+    builder: (context, snapshot) {
+      if (snapshot.hasData) {
+        _forecast = snapshot.data;
+        if (_forecast == null) {
+          return Text("Error Getting Weather");
+        } else {
+          return dailyBoxes(_forecast);
+        }
+      } else {
+        return Center(child: CircularProgressIndicator());
+      }
+    },
+    future: getForecast(location),
+  );
+}
+
+Widget weatherBox(WeatherModel _weathermodel) {
+  return Container(
+    padding: const EdgeInsets.all(15.0),
+    margin: const EdgeInsets.all(15.0),
+    height: 160.0,
+    decoration:
+        BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(20))),
+    child: Row(
+      children: [
+        Expanded(
             child: Column(
-              children: [
-                SizedBox(
-                  height: myHeight * 0.03,
-                ),
-                Text(
-                  widget.weatherModel[StaticFile.myLocationIndex].name
-                      .toString(),
-                  style: TextStyle(fontSize: 40, color: Colors.white),
-                ),
-                SizedBox(
-                  height: myHeight * 0.01,
-                ),
-                Text(
-                  '4 May 2023'.toString(),
-                  style: TextStyle(
-                      fontSize: 20, color: Colors.white.withOpacity(0.5)),
-                ),
-                SizedBox(
-                  height: myHeight * 0.05,
-                ),
-                Container(
-                  height: myHeight * 0.05,
-                  width: myWidth * 0.6,
-                  decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.5),
-                      borderRadius: BorderRadius.circular(10)),
-                  child: Row(children: [
-                    Expanded(
-                        flex: 2,
-                        child: Container(
-                          decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(10),
-                              gradient: LinearGradient(colors: [
-                                Color.fromARGB(255, 21, 85, 169),
-                                Color.fromARGB(255, 44, 162, 246),
-                              ])),
-                          child: Center(
-                            child: Text(
-                              'Forecast',
-                              style:
-                                  TextStyle(color: Colors.white, fontSize: 18),
-                            ),
-                          ),
-                        )),
-                    Expanded(
-                        flex: 2,
-                        child: Container(
-                          child: Center(
-                            child: Text(
-                              'Air Quality',
-                              style: TextStyle(
-                                  color: Colors.white.withOpacity(0.5),
-                                  fontSize: 18),
-                            ),
-                          ),
-                        ))
-                  ]),
-                ),
-                SizedBox(
-                  height: myHeight * 0.08,
-                ),
-                Image.asset(
-                  widget.weatherModel[StaticFile.myLocationIndex]
-                      .weeklyWeather[0].mainImg
-                      .toString(),
-                  height: myHeight * 0.3,
-                  width: myWidth * 0.8,
-                ),
-                SizedBox(
-                  height: myHeight * 0.05,
-                ),
-                Container(
-                  height: myHeight * 0.06,
-                  child: Row(children: [
-                    Expanded(
-                      flex: 2,
-                      child: Column(children: [
-                        Text(
-                          'Temp',
-                          style: TextStyle(
-                              color: Colors.white.withOpacity(0.5),
-                              fontSize: 20),
-                        ),
-                        Text(
-                          widget.weatherModel[StaticFile.myLocationIndex]
-                              .weeklyWeather![0]!.mainTemp
-                              .toString(),
-                          style: TextStyle(color: Colors.white, fontSize: 20),
-                        ),
-                      ]),
-                    ),
-                    Expanded(
-                      flex: 2,
-                      child: Column(children: [
-                        Text(
-                          'Wind',
-                          style: TextStyle(
-                              color: Colors.white.withOpacity(0.5),
-                              fontSize: 20),
-                        ),
-                        Text(
-                          widget.weatherModel[StaticFile.myLocationIndex]
-                              .weeklyWeather![0]!.mainWind
-                              .toString(),
-                          style: TextStyle(color: Colors.white, fontSize: 20),
-                        ),
-                      ]),
-                    ),
-                    Expanded(
-                      flex: 2,
-                      child: Column(children: [
-                        Text(
-                          'Humidity',
-                          style: TextStyle(
-                              color: Colors.white.withOpacity(0.5),
-                              fontSize: 20),
-                        ),
-                        Text(
-                          widget.weatherModel[StaticFile.myLocationIndex]
-                              .weeklyWeather![0]!.mainHumidity
-                              .toString(),
-                          style: TextStyle(color: Colors.white, fontSize: 20),
-                        ),
-                      ]),
-                    ),
-                  ]),
-                ),
-                SizedBox(
-                  height: myHeight * 0.04,
-                )
-              ],
-            )),
-      ),
-    );
-  } 
-}*/
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+              // TODO: add icon
+              Container(
+                  margin: const EdgeInsets.all(5.0),
+                  child: Text(
+                    "${_weathermodel.description.capitalizeFirstOfEach}",
+                    style: TextStyle(
+                        fontWeight: FontWeight.normal,
+                        fontSize: 16,
+                        color: Colors.white),
+                  )),
+              Container(
+                  margin: const EdgeInsets.all(5.0),
+                  child: Text(
+                    "H:${_weathermodel.high.toInt}℃ L:${_weathermodel.low.toInt}℃",
+                    style: TextStyle(
+                        fontWeight: FontWeight.normal,
+                        fontSize: 13,
+                        color: Colors.white),
+                  )),
+            ])),
+        Column(children: [
+          Container(
+              child: Text(
+            "${_weathermodel.temp.toInt}℃",
+            textAlign: TextAlign.left,
+            style: TextStyle(
+                fontSize: 60, fontWeight: FontWeight.bold, color: Colors.white),
+          )),
+          Container(
+              child: Text(
+            "Feels like ${_weathermodel.feelsLike.toInt}℃",
+            textAlign: TextAlign.left,
+            style: TextStyle(
+                fontSize: 13, fontWeight: FontWeight.bold, color: Colors.white),
+          )),
+        ])
+      ],
+    ),
+  );
+}
+
+Future getCurrentWeather() async {
+  WeatherModel weathermodel;
+  String location = 'Kuala Lumpur';
+  String apiKey = 'eedffe980ac9dfa9c47dc3c855b96081';
+  var url =
+      'https://api.openweathermap.org/data/2.5/weather?q=$location&appid=$apiKey&units=metric';
+
+  final response = await http.get(Uri.parse(url));
+
+  if (response.statusCode == 200) {
+    weathermodel = WeatherModel.fromJson(jsonDecode(response.body));
+  } else {
+    throw Exception('Failed to load weather data');
+  }
+  return weathermodel;
+}
+
+Future getForecast(Location location) async {
+  Forecast forecast;
+  String lat = location.lat;
+  String lon = location.lon;
+  String apiKey = 'eedffe980ac9dfa9c47dc3c855b96081';
+  var url =
+      'https://api.openweathermap.org/data/2.5/weather?lat=$lat&lon=$lon&appid=$apiKey';
+
+  final response = await http.get(Uri.parse(url));
+
+  if (response.statusCode == 200) {
+    forecast = Forecast.fromJson(jsonDecode(response.body));
+  } else {
+    throw Exception('Failed to load weather data');
+  }
+  return forecast;
+}

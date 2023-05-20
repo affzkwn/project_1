@@ -1,4 +1,4 @@
-import 'dart:async';
+/* import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/services.dart';
@@ -61,3 +61,4 @@ class _SplashState extends State<Splash> {
     );
   }
 }
+ */
