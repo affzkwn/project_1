@@ -213,13 +213,51 @@ Widget weatherDetailsBox(WeatherModel _weathermodel) {
           )),
           Container(
               child: Text(
-            "${_weathermodel.wind} km/h",
+            "${_weathermodel.wind}KM/H",
             textAlign: TextAlign.left,
             style: TextStyle(
                 fontWeight: FontWeight.w700, fontSize: 15, color: Colors.black),
           ))
         ],
-      ))
+      )),
+      Expanded(
+          child: Column(
+        children: [
+          Container(
+              child: Text(
+            "Humidity",
+            textAlign: TextAlign.left,
+            style: TextStyle(
+                fontWeight: FontWeight.w600, fontSize: 12, color: Colors.grey),
+          )),
+          Container(
+              child: Text(
+            "${_weathermodel.humidity.toInt()}%",
+            textAlign: TextAlign.left,
+            style: TextStyle(
+                fontWeight: FontWeight.w700, fontSize: 15, color: Colors.black),
+          ))
+        ],
+      )),
+      Expanded(
+          child: Column(
+        children: [
+          Container(
+              child: Text(
+            "Pressure",
+            textAlign: TextAlign.left,
+            style: TextStyle(
+                fontWeight: FontWeight.w600, fontSize: 12, color: Colors.grey),
+          )),
+          Container(
+              child: Text(
+            "${_weathermodel.pressure} hPa",
+            textAlign: TextAlign.left,
+            style: TextStyle(
+                fontWeight: FontWeight.w700, fontSize: 15, color: Colors.black),
+          ))
+        ],
+      )),
     ]),
   );
 }
