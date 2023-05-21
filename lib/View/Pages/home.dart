@@ -103,57 +103,124 @@ Widget forecastViewsDaily(Location location) {
 }
 
 Widget weatherBox(WeatherModel _weathermodel) {
-  return Container(
-    padding: const EdgeInsets.all(15.0),
-    margin: const EdgeInsets.all(15.0),
-    height: 160.0,
-    decoration:
-        BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(20))),
-    child: Row(
-      children: [
-        Expanded(
-            child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-              // TODO: add icon
-              Container(
-                  margin: const EdgeInsets.all(5.0),
-                  child: Text(
-                    "${_weathermodel.description.capitalizeFirstOfEach}",
-                    style: TextStyle(
-                        fontWeight: FontWeight.normal,
-                        fontSize: 16,
-                        color: Colors.white),
-                  )),
-              Container(
-                  margin: const EdgeInsets.all(5.0),
-                  child: Text(
-                    "H:${_weathermodel.high.toInt}℃ L:${_weathermodel.low.toInt}℃",
-                    style: TextStyle(
-                        fontWeight: FontWeight.normal,
-                        fontSize: 13,
-                        color: Colors.white),
-                  )),
-            ])),
-        Column(children: [
-          Container(
-              child: Text(
-            "${_weathermodel.temp.toInt}℃",
-            textAlign: TextAlign.left,
-            style: TextStyle(
-                fontSize: 60, fontWeight: FontWeight.bold, color: Colors.white),
-          )),
-          Container(
-              child: Text(
-            "Feels like ${_weathermodel.feelsLike.toInt}℃",
-            textAlign: TextAlign.left,
-            style: TextStyle(
-                fontSize: 13, fontWeight: FontWeight.bold, color: Colors.white),
-          )),
-        ])
-      ],
+  return Stack(children: [
+    Container(
+      padding: const EdgeInsets.all(15.0),
+      margin: const EdgeInsets.all(15.0),
+      height: 160.0,
+      decoration: BoxDecoration(
+          color: Colors.indigoAccent,
+          borderRadius: BorderRadius.all(Radius.circular(20))),
     ),
+    ClipPath(
+      clipper: Clipper(),
+      child: Container(
+        padding: const EdgeInsets.all(15.0),
+        margin: const EdgeInsets.all(15.0),
+        height: 160.0,
+        decoration: BoxDecoration(
+            color: Colors.indigoAccent[400],
+            borderRadius: BorderRadius.all(Radius.circular(20))),
+      ),
+    ),
+    Container(
+      padding: const EdgeInsets.all(15.0),
+      margin: const EdgeInsets.all(15.0),
+      height: 160.0,
+      decoration:
+          BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(20))),
+      child: Row(
+        children: [
+          Expanded(
+              child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                // TODO: add icon
+                getWeatherIcon(_weathermodel.icon),
+                Container(
+                    margin: const EdgeInsets.all(5.0),
+                    child: Text(
+                      "${_weathermodel.description.capitalizeFirstOfEach}",
+                      style: TextStyle(
+                          fontWeight: FontWeight.normal,
+                          fontSize: 16,
+                          color: Colors.white),
+                    )),
+                Container(
+                    margin: const EdgeInsets.all(5.0),
+                    child: Text(
+                      "H:${_weathermodel.high.toInt}℃ L:${_weathermodel.low.toInt}℃",
+                      style: TextStyle(
+                          fontWeight: FontWeight.normal,
+                          fontSize: 13,
+                          color: Colors.white),
+                    )),
+              ])),
+          Column(children: [
+            Container(
+                child: Text(
+              "${_weathermodel.temp.toInt}℃",
+              textAlign: TextAlign.left,
+              style: TextStyle(
+                  fontSize: 60,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white),
+            )),
+            Container(
+                child: Text(
+              "Feels like ${_weathermodel.feelsLike.toInt}℃",
+              textAlign: TextAlign.left,
+              style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white),
+            )),
+          ])
+        ],
+      ),
+    )
+  ]);
+}
+
+Widget weatherDetailsBox(WeatherModel _weathermodel) {
+  return Container(
+    padding:
+        const EdgeInsets.only(left: 15.0, top: 25.0, bottom: 25.0, right: 15.0),
+    margin:
+        const EdgeInsets.only(left: 15.0, top: 5.0, bottom: 15.0, right: 15.0),
+    decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.all(Radius.circular(20)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            spreadRadius: 5,
+            blurRadius: 7,
+            offset: Offset(0, 3),
+          )
+        ]),
+    child: Row(children: [
+      Expanded(
+          child: Column(
+        children: [
+          Container(
+              child: Text(
+            "Wind",
+            textAlign: TextAlign.left,
+            style: TextStyle(
+                fontWeight: FontWeight.w600, fontSize: 12, color: Colors.grey),
+          )),
+          Container(
+              child: Text(
+            "${_weathermodel.wind} km/h",
+            textAlign: TextAlign.left,
+            style: TextStyle(
+                fontWeight: FontWeight.w700, fontSize: 15, color: Colors.black),
+          ))
+        ],
+      ))
+    ]),
   );
 }
 
@@ -190,4 +257,49 @@ Future getForecast(Location location) async {
     throw Exception('Failed to load weather data');
   }
   return forecast;
+}
+
+Image getWeatherIcon(String _icon) {
+  String path = 'assets/icons/';
+  String imageExtension = ".png";
+  return Image.asset(
+    path + _icon + imageExtension,
+    width: 70,
+    height: 70,
+  );
+}
+
+Image getWeatherIconSmall(String _icon) {
+  String path = 'assets/icons/';
+  String imageExtension = ".png";
+  return Image.asset(
+    path + _icon + imageExtension,
+    width: 40,
+    height: 40,
+  );
+}
+
+class Clipper extends CustomClipper<Path> {
+  @override
+  Path getClip(Size size) {
+    Path path = Path();
+    path.moveTo(0, size.height - 20);
+
+    path.quadraticBezierTo((size.width / 6) * 1, (size.height / 2) + 15,
+        (size.width / 3) * 1, size.height - 30);
+    path.quadraticBezierTo((size.width / 2) * 1, (size.height + 0),
+        (size.width / 3) * 2, (size.height / 4) * 3);
+    path.quadraticBezierTo((size.width / 6) * 5, (size.height / 2) - 20,
+        (size.width), size.height - 60);
+
+    path.lineTo(size.width, size.height - 60);
+    path.lineTo(size.width, size.height);
+    path.lineTo(0, size.height);
+
+    path.close();
+    return path;
+  }
+
+  @override
+  bool shouldReclip(CustomClipper<Path> oldClipper) => false;
 }
