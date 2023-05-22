@@ -297,7 +297,7 @@ Widget hourlyBoxes(Forecast _forecast) {
               ),
               getWeatherIcon(_forecast.hourly[index].icon),
               Text(
-                "${getTimeFromTimestamp(_forecast.hourly.dt)}",
+                "${getTimeFromTimestamp(_forecast.hourly[index].dt as int)}",
                 style: TextStyle(
                     fontWeight: FontWeight.w600,
                     fontSize: 12,
