@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:html';
 
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:project_1/Model/extension.dart';
 import 'package:project_1/Model/forecast.dart';
 import 'package:project_1/Model/weatherModel.dart';
@@ -262,6 +263,52 @@ Widget weatherDetailsBox(WeatherModel _weathermodel) {
   );
 }
 
+Widget hourlyBoxes(Forecast _forecast) {
+  return Container(
+    margin: EdgeInsets.symmetric(vertical: 0.0),
+    height: 150.0,
+    child: ListView.builder(
+      padding: const EdgeInsets.only(left: 8, top: 0, bottom: 0, right: 8),
+      scrollDirection: Axis.horizontal,
+      itemCount: _forecast.hourly.length,
+      itemBuilder: (BuildContext context, int index) {
+        return Container(
+            padding: const EdgeInsets.only(
+                left: 10.0, top: 15.0, bottom: 15.0, right: 10.0),
+            margin: const EdgeInsets.all(5),
+            decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.all(Radius.circular(18)),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.1),
+                    spreadRadius: 2,
+                    blurRadius: 2,
+                    offset: Offset(0, 1),
+                  )
+                ]),
+            child: Column(children: [
+              Text(
+                "${_forecast.hourly[index].temp}℃",
+                style: TextStyle(
+                    fontWeight: FontWeight.w500,
+                    fontSize: 17,
+                    color: Colors.black),
+              ),
+              getWeatherIcon(_forecast.hourly[index].icon),
+              Text(
+                "${getTimeFromTimestamp(_forecast.hourly.dt)}",
+                style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 12,
+                    color: Colors.grey),
+              ),
+            ]));
+      },
+    ),
+  );
+}
+
 Future getCurrentWeather() async {
   WeatherModel weathermodel;
   String location = 'Kuala Lumpur';
@@ -340,4 +387,16 @@ class Clipper extends CustomClipper<Path> {
 
   @override
   bool shouldReclip(CustomClipper<Path> oldClipper) => false;
+}
+
+String getTimeFromTimestamp(int timestamp) {
+  var date = new DateTime.fromMillisecondsSinceEpoch(timestamp * 1000);
+  var formatter = new DateFormat('h:mm a');
+  return formatter.format(date);
+}
+
+String getDateFromTimestamp(int timestamp) {
+  var date = new DateTime.fromMillisecondsSinceEpoch(timestamp * 1000);
+  var formatter = new DateFormat('h:mm a');
+  return formatter.format(date);
 }
