@@ -1,30 +1,38 @@
 import 'dart:convert';
 import 'dart:html';
-
-import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter/material.dart';
+
 import 'package:project_1/Model/extension.dart';
 import 'package:project_1/Model/forecast.dart';
+import 'package:project_1/Model/cityDropDown.dart';
 import 'package:project_1/Model/weatherModel.dart';
 import 'package:http/http.dart' as http;
 import 'package:project_1/Model/location.dart';
 
 class Home extends StatefulWidget {
   final List<Location> locations;
-  const Home(this.locations);
+  final BuildContext context;
+  const Home(this.locations, this.context);
 
   @override
-  _HomeState createState() => _HomeState(this.locations);
+  _HomeState createState() => _HomeState(this.locations, this.context);
 }
 
 class _HomeState extends State<Home> {
   final List<Location> locations;
-  final Location location;
+  Location location;
   late WeatherModel _weathermodel;
 
-  _HomeState(List<Location> locations)
+  _HomeState(List<Location> locations, BuildContext context)
       : this.locations = locations,
         this.location = locations[0];
+
+  void _changeLocation(Location newLocation) {
+    setState(() {
+      location = newLocation;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -309,12 +317,107 @@ Widget hourlyBoxes(Forecast _forecast) {
   );
 }
 
-Future getCurrentWeather() async {
+Widget dailyBoxes(Forecast _forecast) {
+  return Expanded(
+      child: ListView.builder(
+          shrinkWrap: true,
+          physics: ClampingScrollPhysics(),
+          padding: const EdgeInsets.only(left: 8, top: 0, bottom: 0, right: 8),
+          itemCount: _forecast.daily.length,
+          itemBuilder: (BuildContext context, int index) {
+            return Container(
+                padding: const EdgeInsets.only(
+                    left: 10, top: 5, bottom: 5, right: 10),
+                margin: const EdgeInsets.all(5),
+                child: Row(children: [
+                  Expanded(
+                      child: Text(
+                    "${getDateFromTimestamp(_forecast.daily[index].dt as int)}",
+                    style: TextStyle(fontSize: 14, color: Colors.black),
+                  )),
+                  Expanded(
+                      child: getWeatherIconSmall(_forecast.daily[index].icon)),
+                  Expanded(
+                      child: Text(
+                    "${_forecast.daily[index].high.toInt()}/${_forecast.daily[index].low.toInt()}",
+                    textAlign: TextAlign.right,
+                    style: TextStyle(fontSize: 14, color: Colors.grey),
+                  )),
+                ]));
+          }));
+}
+
+Widget createAppBar(
+    List<Location> locations, Location location, BuildContext context) {
+  // Location dropdownValue = locations.first;
+  return Container(
+      padding: const EdgeInsets.only(left: 20, top: 15, bottom: 15, right: 20),
+      margin:
+          const EdgeInsets.only(top: 35, left: 15.0, bottom: 15.0, right: 15.0),
+      decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.all(Radius.circular(60)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.1),
+              spreadRadius: 5,
+              blurRadius: 7,
+              offset: Offset(0, 3),
+            )
+          ]),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          DropdownButton<Location>(
+            value: location,
+            icon: Icon(
+              Icons.keyboard_arrow_down_rounded,
+              color: Colors.black,
+              size: 24.0,
+              semanticLabel: 'Tap to change location',
+            ),
+            elevation: 16,
+            underline: Container(
+              height: 0,
+              color: Colors.deepPurpleAccent,
+            ),
+            onChanged: (Location newLocation) {
+              // callback(newValue);
+              // setState(() {
+              //   location = newValue;
+              // });
+              _changeLocation(newLocation);
+            },
+            items: locations.map<DropdownMenuItem<Location>>((Location value) {
+              return DropdownMenuItem<Location>(
+                value: value,
+                child: Text.rich(
+                  TextSpan(
+                    children: <TextSpan>[
+                      TextSpan(
+                          text: '${value.city.capitalizeFirstOfEach}, ',
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 16)),
+                      TextSpan(
+                          text: '${value.country.capitalizeFirstOfEach}',
+                          style: TextStyle(
+                              fontWeight: FontWeight.normal, fontSize: 16)),
+                    ],
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+        ],
+      ));
+}
+
+Future getCurrentWeather(Location location) async {
   WeatherModel weathermodel;
-  String location = 'Kuala Lumpur';
+  String city = location.city;
   String apiKey = 'eedffe980ac9dfa9c47dc3c855b96081';
   var url =
-      'https://api.openweathermap.org/data/2.5/weather?q=$location&appid=$apiKey&units=metric';
+      'https://api.openweathermap.org/data/2.5/weather?q=$city&appid=$apiKey&units=metric';
 
   final response = await http.get(Uri.parse(url));
 
@@ -397,6 +500,6 @@ String getTimeFromTimestamp(int timestamp) {
 
 String getDateFromTimestamp(int timestamp) {
   var date = new DateTime.fromMillisecondsSinceEpoch(timestamp * 1000);
-  var formatter = new DateFormat('h:mm a');
+  var formatter = new DateFormat('E');
   return formatter.format(date);
 }
