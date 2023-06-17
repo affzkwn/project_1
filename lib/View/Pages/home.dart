@@ -12,11 +12,10 @@ import 'package:project_1/Model/location.dart';
 
 class Home extends StatefulWidget {
   final List<Location> locations;
-  final BuildContext context;
-  const Home(this.locations, this.context);
+  const Home(this.locations);
 
   @override
-  _HomeState createState() => _HomeState(this.locations, this.context);
+  _HomeState createState() => _HomeState(this.locations);
 }
 
 class _HomeState extends State<Home> {
@@ -24,9 +23,7 @@ class _HomeState extends State<Home> {
   Location location;
   late WeatherModel _weathermodel;
 
-  _HomeState(List<Location> locations, BuildContext context)
-      : this.locations = locations,
-        this.location = locations[0];
+  _HomeState(this.locations) : location = locations[0];
 
   void _changeLocation(Location newLocation) {
     setState(() {
@@ -37,12 +34,15 @@ class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: Colors.grey[100],
-        body: ListView(children: <Widget>[
+      backgroundColor: Colors.grey[100],
+      body: ListView(
+        children: <Widget>[
           currentWeatherViews(this.locations, this.location, this.context),
           forecastViewsHourly(this.location),
           forecastViewsDaily(this.location),
-        ]));
+        ],
+      ),
+    );
   }
 }
 
@@ -58,7 +58,7 @@ Widget currentWeatherViews(
           return Text("Error Getting Weather");
         } else {
           return Column(children: [
-            createAppBar(locations, location, context),
+            createAppBar(location),
             weatherBox(_weathermodel),
             weatherDetailsBox(_weathermodel),
           ]);
@@ -347,8 +347,7 @@ Widget dailyBoxes(Forecast _forecast) {
           }));
 }
 
-Widget createAppBar(
-    List<Location> locations, Location location, BuildContext context) {
+Widget createAppBar(Location location) {
   // Location dropdownValue = locations.first;
   return Container(
       padding: const EdgeInsets.only(left: 20, top: 15, bottom: 15, right: 20),
@@ -368,45 +367,25 @@ Widget createAppBar(
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          DropdownButton<Location>(
-            value: location,
-            icon: Icon(
-              Icons.keyboard_arrow_down_rounded,
-              color: Colors.black,
-              size: 24.0,
-              semanticLabel: 'Tap to change location',
+          Text.rich(
+            TextSpan(
+              children: <TextSpan>[
+                TextSpan(
+                    text: '${location.city.capitalizeFirstOfEach}, ',
+                    style:
+                        TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                TextSpan(
+                    text: '${location.country.capitalizeFirstOfEach}',
+                    style:
+                        TextStyle(fontWeight: FontWeight.normal, fontSize: 16)),
+              ],
             ),
-            elevation: 16,
-            underline: Container(
-              height: 0,
-              color: Colors.deepPurpleAccent,
-            ),
-            onChanged: (Location newLocation) {
-              // callback(newValue);
-              // setState(() {
-              //   location = newValue;
-              // });
-              _changeLocation(newLocation);
-            },
-            items: locations.map<DropdownMenuItem<Location>>((Location value) {
-              return DropdownMenuItem<Location>(
-                value: value,
-                child: Text.rich(
-                  TextSpan(
-                    children: <TextSpan>[
-                      TextSpan(
-                          text: '${value.city.capitalizeFirstOfEach}, ',
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold, fontSize: 16)),
-                      TextSpan(
-                          text: '${value.country.capitalizeFirstOfEach}',
-                          style: TextStyle(
-                              fontWeight: FontWeight.normal, fontSize: 16)),
-                    ],
-                  ),
-                ),
-              );
-            }).toList(),
+          ),
+          Icon(
+            Icons.keyboard_arrow_down_rounded,
+            color: Colors.black,
+            size: 24.0,
+            semanticLabel: 'Tap to change location',
           ),
         ],
       ));
